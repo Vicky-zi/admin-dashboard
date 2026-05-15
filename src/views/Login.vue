@@ -13,12 +13,9 @@ function login() {
 </script>
 
 <template>
-  <div class="h-100 d-flex align-center justify-center">
+  <div class="h-screen d-flex align-center justify-center">
     <v-sheet class="d-flex flex-column pa-8 rounded-lg w-100" max-width="550">
-      <!-- <v-img class="mx-auto" width="120" aspect-ratio="1/1" :src="logo" /> -->
-      <p class="h2 text-center">
-        系統名稱
-      </p>
+      <p class="h2 text-center">系統名稱</p>
       <v-form @submit.prevent="login">
         <v-row>
           <v-col cols="12">
@@ -29,9 +26,7 @@ function login() {
           </v-col>
         </v-row>
 
-        <v-btn class="mt-8" type="submit" block color="primary">
-          登入
-        </v-btn>
+        <v-btn class="mt-8" type="submit" block color="primary"> 登入 </v-btn>
       </v-form>
     </v-sheet>
   </div>
