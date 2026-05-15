@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHashHistory } from 'vue-router'
 
 import dashboardRoutes from './page/Dashboard/Dashboard'
 import productRoutes from './page/Product/Product'
@@ -22,12 +22,7 @@ function flattenRoute(routes) {
   return flatRoute
 }
 
-const pageRoutes = [
-  ...dashboardRoutes,
-  ...productRoutes,
-  ...oderRoutes,
-  ...memberRoutes
-]
+const pageRoutes = [...dashboardRoutes, ...productRoutes, ...oderRoutes, ...memberRoutes]
 
 // 給麵包屑使用的原始巢狀結構
 export const routes = [
@@ -39,10 +34,8 @@ export const routes = [
   {
     path: '/',
     component: () => import('@/views/Layout.vue'),
-    children: [
-      ...pageRoutes
-    ]
-  }
+    children: [...pageRoutes],
+  },
 ]
 
 // 給 router 使用的攤平結構
@@ -55,13 +48,13 @@ const flatRoutes = [
   {
     path: '/',
     component: () => import('@/views/Layout.vue'),
-    children: flattenRoute(pageRoutes)
-  }
+    children: flattenRoute(pageRoutes),
+  },
 ]
 
 const router = createRouter({
-  history: createWebHistory(),
-  routes: flatRoutes
+  history: createWebHashHistory(),
+  routes: flatRoutes,
 })
 
 export default router
