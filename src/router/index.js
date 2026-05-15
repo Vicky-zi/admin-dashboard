@@ -41,7 +41,7 @@ export const routes = [
 // 給 router 使用的攤平結構
 const flatRoutes = [
   {
-    path: '/Login',
+    path: '/login',
     name: 'Login',
     component: () => import('@/views/Login.vue'),
   },
@@ -49,6 +49,10 @@ const flatRoutes = [
     path: '/',
     component: () => import('@/views/Layout.vue'),
     children: flattenRoute(pageRoutes),
+  },
+  {
+    path: '/:pathMatch(.*)*',
+    redirect: '/login',
   },
 ]
 
