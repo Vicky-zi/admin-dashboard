@@ -47,6 +47,7 @@ const flatRoutes = [
   },
   {
     path: '/',
+    redirect: { name: 'Login' },
     component: () => import('@/views/Layout.vue'),
     children: flattenRoute(pageRoutes),
   },
