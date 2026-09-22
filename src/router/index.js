@@ -5,6 +5,8 @@ import productRoutes from './page/Product/Product'
 import oderRoutes from './page/Orders/Orders'
 import memberRoutes from './page/Member/Member'
 
+import { useUserStore } from '@/stores/userStore.js'
+
 // 攤平路由
 function flattenRoute(routes) {
   let flatRoute = []
@@ -60,6 +62,26 @@ const flatRoutes = [
 const router = createRouter({
   history: createWebHashHistory(),
   routes: flatRoutes,
+})
+
+router.beforeEach((to) => {
+  const userStore = useUserStore()
+
+  // 沒有登入，且不是 Login
+  if (!userStore.user && to.name !== 'Login') {
+    return {
+      name: 'Login',
+    }
+  }
+
+  // 已經登入，卻進入 Login
+  if (userStore.user && to.name === 'Login') {
+    return {
+      name: 'Dashboard',
+    }
+  }
+
+  return true
 })
 
 export default router
