@@ -1,7 +1,28 @@
 let members = [
-  { id: 1, name: 'admin', role: 0, createdAt: '2026-01-01', updatedAt: '2026-03-04' },
-  { id: 2, name: 'guest', role: 1, createdAt: '2026-01-05', updatedAt: '2026-03-04' },
-  { id: 3, name: 'guest2', role: 1, createdAt: '2026-01-05', updatedAt: '2026-03-04' },
+  {
+    id: 1,
+    name: 'admin',
+    password: 'admin',
+    role: 0,
+    createdAt: '2025-01-01',
+    updatedAt: '2026-03-04',
+  },
+  {
+    id: 2,
+    name: 'guest',
+    password: 'guest',
+    role: 1,
+    createdAt: '2026-01-05',
+    updatedAt: '2026-03-04',
+  },
+  {
+    id: 3,
+    name: 'guest2',
+    password: 'guest2',
+    role: 1,
+    createdAt: '2026-01-05',
+    updatedAt: '2026-03-04',
+  },
 ]
 
 const delay = (ms) => new Promise((r) => setTimeout(r, ms))
