@@ -1,9 +1,12 @@
 <script setup>
+import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
+import { useUserStore } from '@/stores/userStore'
 import { useMemberStore } from '@/stores/memberStore'
 
 const router = useRouter()
+const userStore = useUserStore()
 const memberStore = useMemberStore()
 const { items, loading } = storeToRefs(memberStore)
 
@@ -13,6 +16,11 @@ const headers = [
   { title: '創建時間', key: 'createdAt' },
   { title: '操作', key: 'action', sortable: false },
 ]
+
+// 權限僅檢視
+const isReadOnly = computed(() => {
+  return userStore.user?.role > 0
+})
 
 // 操作：導轉
 const goEdit = (id) => {
@@ -37,12 +45,14 @@ onMounted(() => {
       </template>
       <template v-slot:item.action="{ item }">
         <!-- 編輯 -->
-        <v-icon v-if="item.role !== 0" class="mr-2" @click="goEdit(item.id)"> mdi-pencil </v-icon>
+        <v-icon v-if="item.role !== 0" :disabled="isReadOnly" class="mr-2" @click="goEdit(item.id)">
+          mdi-pencil
+        </v-icon>
 
         <!-- 刪除 -->
         <v-dialog v-if="item.role !== 0" max-width="400">
           <template v-slot:activator="{ props: activatorProps }">
-            <v-icon v-bind="activatorProps" class="mr-2"> mdi-delete </v-icon>
+            <v-icon v-bind="activatorProps" :disabled="isReadOnly" class="mr-2"> mdi-delete </v-icon>
           </template>
 
           <template v-slot:default="{ isActive }">

@@ -74,6 +74,7 @@ onMounted(async () => {
                     variant="outlined"
                     clearable
                     :rules="rules.name"
+                    :disabled="isEdit"
                   />
                 </v-col>
 
