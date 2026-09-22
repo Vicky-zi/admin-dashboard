@@ -1,14 +1,41 @@
 <script setup>
+import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { useUserStore } from '@/stores/userStore'
+
 const router = useRouter()
+const userStore = useUserStore()
 
 const data = ref({
-  account: 'test123',
-  password: 'test123',
+  account: '',
+  password: '',
 })
 
-function login() {
-  router.push({ name: 'Dashboard' })
+const loading = ref(false)
+
+// 帳號、密碼都有輸入，按鈕才可以點擊
+const canLogin = computed(() => {
+  return data.value.account.trim() !== '' && data.value.password.trim() !== ''
+})
+
+async function login() {
+  try {
+    loading.value = true
+
+    // 登入時才檢查帳號密碼
+    const result = await userStore.login(data.value.account, data.value.password)
+
+    // 帳號或密碼錯誤
+    if (!result.success) {
+      alert('帳號或密碼錯誤')
+      return
+    }
+
+    // 登入成功
+    router.push({ name: 'Dashboard' })
+  } finally {
+    loading.value = false
+  }
 }
 </script>
 
@@ -16,17 +43,19 @@ function login() {
   <div class="h-screen d-flex align-center justify-center">
     <v-sheet class="d-flex flex-column pa-8 rounded-lg w-100" max-width="550">
       <p class="h2 text-center">系統名稱</p>
+
       <v-form @submit.prevent="login">
         <v-row>
           <v-col cols="12">
-            <VTextField v-model="data.account" label="帳號" required placeholder="請輸入帳號" />
+            <VTextField v-model="data.account" label="帳號" placeholder="請輸入帳號" />
           </v-col>
+
           <v-col cols="12">
-            <VTextField v-model="data.password" label="密碼" type="password" required placeholder="請輸入密碼" />
+            <VTextField v-model="data.password" label="密碼" type="password" placeholder="請輸入密碼" />
           </v-col>
         </v-row>
 
-        <v-btn class="mt-8" type="submit" block color="primary"> 登入 </v-btn>
+        <v-btn class="mt-8" type="submit" block color="primary" :disabled="!canLogin" :loading="loading"> 登入 </v-btn>
       </v-form>
     </v-sheet>
   </div>
