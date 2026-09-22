@@ -9,8 +9,8 @@ export const useMemberStore = defineStore('member', () => {
   const loading = ref(false)
 
   const roleOptions = [
-    { title: 'guest', value: 1 },
-    { title: 'admin', value: 0 },
+    { title: '管理員', value: 1 },
+    { title: '最高權限管理員', value: 0 },
   ]
 
   const getRoleText = (value) => {
