@@ -12,8 +12,11 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     Breadcrumbs: typeof import('./src/components/Breadcrumbs.vue')['default']
+    ConfirmDialog: typeof import('./src/components/ConfirmDialog.vue')['default']
+    Fjigj: typeof import('./src/components/fjigj.vue')['default']
     Header: typeof import('./src/components/Header.vue')['default']
     HelloWorld: typeof import('./src/components/HelloWorld.vue')['default']
+    MessageDialog: typeof import('./src/components/MessageDialog.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     Sidebar: typeof import('./src/components/Sidebar.vue')['default']
