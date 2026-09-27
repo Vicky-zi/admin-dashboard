@@ -1,10 +1,19 @@
 <script setup>
 import { useRoute, useRouter } from 'vue-router'
 import { useMemberStore } from '@/stores/memberStore'
+import { useDialog } from '@/composables/useDialog'
 
 const memberStore = useMemberStore()
 const route = useRoute()
 const router = useRouter()
+const {
+  showConfirmDialog,
+  showMessageDialog,
+  messageDialog,
+  openMessageDialog,
+  closeMessageDialog,
+  closeConfirmDialog,
+} = useDialog()
 
 const isEdit = computed(() => !!route.params.id)
 const formRef = ref(null)
@@ -32,21 +41,55 @@ const submit = async () => {
 
     const payload = { ...form.value }
 
+    if (route.params.id === '3') {
+      throw new Error('模擬儲存失敗')
+    }
+
     await memberStore.update(form.value.id, payload)
 
-    router.push({ name: 'Member' })
+    // API 成功後等待 1 秒
+    await new Promise((resolve) => {
+      setTimeout(resolve, 1000)
+    })
+
+    // 顯示成功訊息
+    openMessageDialog({
+      title: '儲存成功',
+      text: '資料已成功儲存，請按下確認後返回列表頁。',
+      type: 'success',
+    })
   } catch (err) {
     console.error('儲存失敗', err)
+
+    // 顯示失敗訊息
+    openMessageDialog({
+      title: '儲存失敗',
+      text: '資料儲存失敗，請稍後再試。',
+      type: 'error',
+    })
   } finally {
     submitLoading.value = false
   }
 }
 
+// 儲存成功後，跳轉回前頁
+function handleMessageClose() {
+  closeMessageDialog()
+
+  if (messageDialog.type === 'success') {
+    router.push({
+      name: 'Member',
+    })
+  }
+}
+
 // 操作：取消
-const handleCancel = (isActive) => {
-  isActive.value = false
+const handleCancel = () => {
+  closeConfirmDialog()
   router.push({ name: 'Member' })
 }
+
+const isProcessing = computed(() => submitLoading.value)
 
 onMounted(async () => {
   if (isEdit.value) {
@@ -96,27 +139,18 @@ onMounted(async () => {
               最後更新時間 {{ form.updatedAt || '-' }}
             </div>
 
-            <v-dialog max-width="400">
-              <template v-slot:activator="{ props: activatorProps }">
-                <v-btn variant="text" v-bind="activatorProps"> 捨棄 </v-btn>
+            <ConfirmDialog
+              v-model="showConfirmDialog"
+              title="確認捨棄"
+              text="即將放棄編輯，未儲存內容將遺失並返回列表頁。"
+              confirm-text="確認"
+              confirm-color="red"
+              @confirm="handleCancel"
+            >
+              <template #activator="{ props }">
+                <v-btn variant="text" :disabled="isProcessing" v-bind="props"> 捨棄 </v-btn>
               </template>
-
-              <template v-slot:default="{ isActive }">
-                <v-card title="確認捨棄">
-                  <v-card-text>
-                    即將<strong class="text-error">放棄編輯</strong>，未儲存內容將遺失並返回列表頁。<br />
-                    是否繼續？
-                  </v-card-text>
-
-                  <v-card-actions>
-                    <v-spacer></v-spacer>
-
-                    <v-btn text="取消" @click="isActive.value = false"></v-btn>
-                    <v-btn text="確認" color="red" variant="flat" @click="handleCancel(isActive)"></v-btn>
-                  </v-card-actions>
-                </v-card>
-              </template>
-            </v-dialog>
+            </ConfirmDialog>
 
             <v-btn color="primary" variant="flat" :loading="submitLoading" :disabled="!valid" @click="submit">
               儲存
@@ -124,6 +158,14 @@ onMounted(async () => {
           </v-card-actions>
         </v-card>
       </v-col>
+
+      <MessageDialog
+        v-model="showMessageDialog"
+        :title="messageDialog.title"
+        :text="messageDialog.text"
+        :type="messageDialog.type"
+        @close="handleMessageClose"
+      />
     </v-row>
   </v-container>
 </template>

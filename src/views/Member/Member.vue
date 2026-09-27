@@ -4,11 +4,13 @@ import { useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { useUserStore } from '@/stores/userStore'
 import { useMemberStore } from '@/stores/memberStore'
+import { useDialog } from '@/composables/useDialog'
 
 const router = useRouter()
 const userStore = useUserStore()
 const memberStore = useMemberStore()
 const { items, loading } = storeToRefs(memberStore)
+const { openConfirmDialog, showConfirmDialog, closeConfirmDialog } = useDialog()
 
 const headers = [
   { title: '帳號', key: 'name' },
@@ -27,9 +29,23 @@ const goEdit = (id) => {
   router.push({ name: 'MemberEdit', params: { id: id } })
 }
 
+const deleteId = ref(null)
+
+const openDeleteDialog = (id) => {
+  deleteId.value = id
+  openConfirmDialog()
+}
+
 // 操作：刪除
-const deleteItem = async (id) => {
-  await memberStore.remove(id)
+const deleteItem = async () => {
+  try {
+    await memberStore.remove(deleteId.value)
+
+    closeConfirmDialog()
+    deleteId.value = null
+  } catch (err) {
+    console.error('刪除失敗', err)
+  }
 }
 
 onMounted(() => {
@@ -45,44 +61,25 @@ onMounted(() => {
       </template>
       <template v-slot:item.action="{ item }">
         <!-- 編輯 -->
-        <v-icon v-if="item.role !== 0" :disabled="isReadOnly" class="mr-2" @click="goEdit(item.id)">
-          mdi-pencil
-        </v-icon>
+        <v-btn v-if="item.role !== 0" icon variant="text" :disabled="isReadOnly" @click="goEdit(item.id)">
+          <v-icon>mdi-pencil</v-icon>
+        </v-btn>
 
         <!-- 刪除 -->
-        <v-dialog v-if="item.role !== 0" max-width="400">
-          <template v-slot:activator="{ props: activatorProps }">
-            <v-icon v-bind="activatorProps" :disabled="isReadOnly" class="mr-2"> mdi-delete </v-icon>
-          </template>
-
-          <template v-slot:default="{ isActive }">
-            <v-card title="確認刪除">
-              <v-card-text>
-                此操作將<strong class="text-error">永久刪除</strong>該資料，且<strong>無法復原</strong>。<br />
-                請確認是否繼續？
-              </v-card-text>
-
-              <v-card-actions>
-                <v-spacer></v-spacer>
-
-                <v-btn text="關閉" @click="isActive.value = false"></v-btn>
-                <v-btn
-                  text="確認"
-                  color="red"
-                  variant="flat"
-                  @click="
-                    () => {
-                      isActive.value = false
-                      deleteItem(item.id)
-                    }
-                  "
-                ></v-btn>
-              </v-card-actions>
-            </v-card>
-          </template>
-        </v-dialog>
+        <v-btn v-if="item.role !== 0" icon variant="text" :disabled="isReadOnly" @click="openDeleteDialog(item.id)">
+          <v-icon>mdi-delete</v-icon>
+        </v-btn>
       </template>
     </v-data-table>
+
+    <ConfirmDialog
+      v-model="showConfirmDialog"
+      title="確認刪除"
+      text="此操作將<strong class='text-error'>永久刪除</strong>該資料，且<strong>無法復原</strong>。<br />請確認是否繼續？"
+      confirm-text="確認"
+      confirm-color="red"
+      @confirm="deleteItem()"
+    />
   </div>
 </template>
 <style lang=""></style>
