@@ -3,8 +3,11 @@ import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/userStore'
 
+import { useDialog } from '@/composables/useDialog'
+
 const router = useRouter()
 const userStore = useUserStore()
+const { showMessageDialog, messageDialog, openMessageDialog } = useDialog()
 
 const data = ref({
   account: '',
@@ -37,11 +40,20 @@ async function login() {
 
     // 帳號或密碼錯誤
     if (!result.success) {
-      alert('帳號或密碼錯誤')
+      // 顯示失敗訊息
+      openMessageDialog({
+        title: '登入失敗',
+        text: '帳號密碼錯誤，請稍後再試。',
+        type: 'error',
+      })
       return
     }
 
-    // 登入成功
+    // API 成功後等待 1 秒
+    await new Promise((resolve) => {
+      setTimeout(resolve, 1000)
+    })
+
     router.push({ name: 'Dashboard' })
   } finally {
     loading.value = false
@@ -85,5 +97,12 @@ const vFocus = {
         <v-btn class="mt-8" type="submit" block color="primary" :disabled="!canLogin" :loading="loading"> 登入 </v-btn>
       </v-form>
     </v-sheet>
+
+    <MessageDialog
+      v-model="showMessageDialog"
+      :title="messageDialog.title"
+      :text="messageDialog.text"
+      :type="messageDialog.type"
+    />
   </div>
 </template>
