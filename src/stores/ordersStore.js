@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
-import { getOrders, updateOrders, getOrdersById, updateOrdersStatus } from '@/api/Orders'
+import { getOrders, updateOrders, getOrdersById, updateOrdersStatus } from '@/api/orders'
 
 export const useOrdersStore = defineStore('orders', () => {
   const items = ref([])
