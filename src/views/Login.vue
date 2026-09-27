@@ -11,6 +11,13 @@ const data = ref({
   password: '',
 })
 
+// 驗證規則
+const rules = {
+  account: [(v) => !!v || '請輸入會員帳號'],
+  password: [(v) => !!v || '請輸入會員密碼'],
+}
+
+const formRef = ref(null)
 const loading = ref(false)
 
 // 帳號、密碼都有輸入，按鈕才可以點擊
@@ -19,6 +26,9 @@ const canLogin = computed(() => {
 })
 
 async function login() {
+  const result = await formRef.value.validate()
+  if (!result.valid) return
+
   try {
     loading.value = true
 
@@ -55,14 +65,20 @@ const vFocus = {
     <v-sheet class="d-flex flex-column pa-8 rounded-lg w-100" max-width="550">
       <p class="h2 text-center">系統名稱</p>
 
-      <v-form @submit.prevent="login">
+      <v-form ref="formRef" @submit.prevent="login">
         <v-row>
           <v-col cols="12">
-            <VTextField v-model="data.account" v-focus label="帳號" placeholder="請輸入帳號" />
+            <VTextField v-model="data.account" v-focus :rules="rules.account" label="帳號" placeholder="請輸入帳號" />
           </v-col>
 
           <v-col cols="12">
-            <VTextField v-model="data.password" label="密碼" type="password" placeholder="請輸入密碼" />
+            <VTextField
+              v-model="data.password"
+              :rules="rules.password"
+              label="密碼"
+              type="password"
+              placeholder="請輸入密碼"
+            />
           </v-col>
         </v-row>
 
