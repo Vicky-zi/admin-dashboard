@@ -37,6 +37,17 @@ async function login() {
     loading.value = false
   }
 }
+
+// 一進入頁面直接focus帳號欄位
+const vFocus = {
+  mounted(el) {
+    const input = el.querySelector('input')
+
+    if (input) {
+      input.focus()
+    }
+  },
+}
 </script>
 
 <template>
@@ -47,7 +58,7 @@ async function login() {
       <v-form @submit.prevent="login">
         <v-row>
           <v-col cols="12">
-            <VTextField v-model="data.account" label="帳號" placeholder="請輸入帳號" />
+            <VTextField v-model="data.account" v-focus label="帳號" placeholder="請輸入帳號" />
           </v-col>
 
           <v-col cols="12">
