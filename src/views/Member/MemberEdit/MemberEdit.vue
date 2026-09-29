@@ -2,6 +2,7 @@
 import { useRoute, useRouter } from 'vue-router'
 import { useMemberStore } from '@/stores/memberStore'
 import { useDialog } from '@/composables/useDialog'
+import { dialogMessages } from '@/constants/dialogMessages'
 
 const memberStore = useMemberStore()
 const route = useRoute()
@@ -53,20 +54,12 @@ const submit = async () => {
     })
 
     // 顯示成功訊息
-    openMessageDialog({
-      title: '儲存成功',
-      text: '資料已成功儲存，請按下確認後返回列表頁。',
-      type: 'success',
-    })
+    openMessageDialog(dialogMessages.saveSuccess)
   } catch (err) {
     console.error('儲存失敗', err)
 
     // 顯示失敗訊息
-    openMessageDialog({
-      title: '儲存失敗',
-      text: '資料儲存失敗，請稍後再試。',
-      type: 'error',
-    })
+    openMessageDialog(dialogMessages.saveError)
   } finally {
     submitLoading.value = false
   }
@@ -141,8 +134,8 @@ onMounted(async () => {
 
             <ConfirmDialog
               v-model="showConfirmDialog"
-              title="確認捨棄"
-              text="即將放棄編輯，未儲存內容將遺失並返回列表頁。"
+              :title="dialogMessages.discard.title"
+              :text="dialogMessages.discard.text"
               confirm-text="確認"
               confirm-color="red"
               @confirm="handleCancel"

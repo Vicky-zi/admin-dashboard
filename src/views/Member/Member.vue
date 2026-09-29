@@ -5,6 +5,7 @@ import { storeToRefs } from 'pinia'
 import { useUserStore } from '@/stores/userStore'
 import { useMemberStore } from '@/stores/memberStore'
 import { useDialog } from '@/composables/useDialog'
+import { dialogMessages } from '@/constants/dialogMessages'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -74,8 +75,8 @@ onMounted(() => {
 
     <ConfirmDialog
       v-model="showConfirmDialog"
-      title="確認刪除"
-      text="此操作將<strong class='text-error'>永久刪除</strong>該資料，且<strong>無法復原</strong>。<br />請確認是否繼續？"
+      :title="dialogMessages.delete.title"
+      :text="dialogMessages.delete.text"
       confirm-text="確認"
       confirm-color="red"
       @confirm="deleteItem()"
