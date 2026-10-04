@@ -43,6 +43,7 @@ let roles = [
       'product.view',
       'product.status',
       'product.inventory',
+      'product.inventory',
 
       'order.view',
       'order.ship',

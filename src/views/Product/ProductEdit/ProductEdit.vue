@@ -24,11 +24,11 @@ const submitLoading = ref(false)
 
 // 權限判斷
 const canChangeProductStatus = computed(() => {
-  return userStore.user?.permissions.includes('product.status')
+  return userStore.user?.permissions?.includes('product.status') ?? false
 })
 
 const canEditProductInventory = computed(() => {
-  return userStore.user?.permissions.includes('product.inventory')
+  return userStore.user?.permissions?.includes('product.inventory') ?? false
 })
 
 const form = ref({

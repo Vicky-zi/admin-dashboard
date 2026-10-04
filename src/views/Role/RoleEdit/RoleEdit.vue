@@ -53,7 +53,11 @@ const permissionGroups = {
     },
     {
       label: '商品上下架',
-      value: 'product.publish',
+      value: 'product.status',
+    },
+    {
+      label: '庫存管理',
+      value: 'product.inventory',
     },
   ],
 
