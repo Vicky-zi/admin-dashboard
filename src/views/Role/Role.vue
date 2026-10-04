@@ -1,33 +1,36 @@
 <script setup>
-import { computed } from 'vue'
-import { useRouter } from 'vue-router'
-import { storeToRefs } from 'pinia'
-import { useUserStore } from '@/stores/userStore'
-import { useMemberStore } from '@/stores/memberStore'
+import { useRoleStore } from '@/stores/roleStore'
+import { useUserStore } from '@/stores/userStore.js'
 import { useDialog } from '@/composables/useDialog'
 import { dialogMessages } from '@/constants/dialogMessages'
 
+const route = useRoute()
 const router = useRouter()
+const roleStore = useRoleStore()
 const userStore = useUserStore()
-const memberStore = useMemberStore()
-const { items, loading } = storeToRefs(memberStore)
+const { items, loading } = storeToRefs(roleStore)
 const { openConfirmDialog, showConfirmDialog, closeConfirmDialog } = useDialog()
 
 const headers = [
-  { title: '帳號', key: 'name' },
-  { title: '權限', key: 'role' },
+  { title: '權限', key: 'name' },
+  { title: '使用人數', key: 'userCount' },
+  { title: '啟用狀態', key: 'state' },
   { title: '創建時間', key: 'createdAt' },
   { title: '操作', key: 'action', sortable: false },
 ]
 
-// 權限僅檢視
-const isReadOnly = computed(() => {
-  return userStore.user?.role > 0
-})
+// 權限判斷
+const canEditRole = () => {
+  return userStore.user.permissions.includes('role.edit') || userStore.user.roleId === 1
+}
+
+const canDeleteRole = () => {
+  return userStore.user.permissions.includes('role.delete') || userStore.user.roleId === 1
+}
 
 // 操作：導轉
 const goEdit = (id) => {
-  router.push({ name: 'MemberEdit', params: { id: id } })
+  router.push({ name: `${route.name}Edit`, params: { id: id } })
 }
 
 const deleteId = ref(null)
@@ -40,7 +43,7 @@ const openDeleteDialog = (id) => {
 // 操作：刪除
 const deleteItem = async () => {
   try {
-    await memberStore.remove(deleteId.value)
+    await userStore.remove(deleteId.value)
 
     closeConfirmDialog()
     deleteId.value = null
@@ -50,24 +53,24 @@ const deleteItem = async () => {
 }
 
 onMounted(() => {
-  memberStore.fetchMemberList()
+  roleStore.fetchRoleList()
 })
 </script>
 
 <template>
   <div>
     <v-data-table :headers="headers" :items="items" :loading="loading">
-      <template v-slot:item.role="{ item }">
-        {{ memberStore.getRoleText(item.role) }}
+      <template v-slot:item.state="{ item }">
+        {{ roleStore.getStatusText(item.state) }}
       </template>
       <template v-slot:item.action="{ item }">
         <!-- 編輯 -->
-        <v-btn v-if="item.role !== 0" icon variant="text" :disabled="isReadOnly" @click="goEdit(item.id)">
+        <v-btn v-if="canEditRole()" icon variant="text" @click="goEdit(item.id)">
           <v-icon>mdi-pencil</v-icon>
         </v-btn>
 
         <!-- 刪除 -->
-        <v-btn v-if="item.role !== 0" icon variant="text" :disabled="isReadOnly" @click="openDeleteDialog(item.id)">
+        <v-btn v-if="canDeleteRole()" icon variant="text" @click="openDeleteDialog(item.id)">
           <v-icon>mdi-delete</v-icon>
         </v-btn>
       </template>

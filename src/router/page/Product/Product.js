@@ -16,7 +16,13 @@ export default [
         name: 'ProductEdit',
         meta: { title: '編輯商品', hidden: true },
         component: () => import('@/views/Product/ProductEdit/ProductEdit.vue'),
-      }
-    ]
+      },
+      {
+        path: 'view/:id',
+        name: 'ProductView',
+        meta: { title: '檢視商品', hidden: true },
+        component: () => import('@/views/Product/ProductEdit/ProductView.vue'),
+      },
+    ],
   },
 ]

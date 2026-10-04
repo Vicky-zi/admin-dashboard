@@ -43,7 +43,7 @@ let orders = [
     orderNo: 'ORD004',
     totalAmount: 8000,
     status: 3,
-    paymentStatus: 0,
+    paymentStatus: 1,
     customerName: '王小明',
     customerPhone: '0911111111',
     customerEmail: ' ',

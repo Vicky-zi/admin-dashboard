@@ -1,10 +1,10 @@
 <script setup>
 import { useAppStore } from '@/stores/appStore.js'
 import { useUserStore } from '@/stores/userStore.js'
-import { useMemberStore } from '@/stores/memberStore'
+import { useAccountStore } from '@/stores/accountStore'
 const appStore = useAppStore()
 const userStore = useUserStore()
-const memberStore = useMemberStore()
+const accountStore = useAccountStore()
 
 const { showSidebar } = storeToRefs(appStore)
 const { user } = storeToRefs(userStore)
@@ -18,16 +18,6 @@ const props = defineProps({
 const { showHamburger } = toRefs(props)
 
 const emit = defineEmits(['update:showSidebar'])
-
-// 權限
-const role = computed(() => {
-  return memberStore.getRoleText(user.value?.role)
-})
-
-// 帳號
-const userName = computed(() => {
-  return user.value?.name || ''
-})
 
 // ====================
 // 登出倒數
@@ -94,7 +84,7 @@ function openSidebar() {
     <v-spacer />
 
     <div class="d-flex align-center">
-      <v-toolbar-title class="mr-4"> {{ userName }}（{{ role }}） </v-toolbar-title>
+      <v-toolbar-title class="mr-4"> {{ user?.name || '' }}（{{ user?.roleName || '' }}） </v-toolbar-title>
 
       <span class="mr-4">
         {{ remainingTime }}

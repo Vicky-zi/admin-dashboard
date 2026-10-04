@@ -1,22 +1,42 @@
 <script setup>
-import { useRoute, useRouter } from 'vue-router'
+import { useUserStore } from '@/stores/userStore.js'
 import { useProductStore } from '@/stores/productStore'
-import { createProduct, updateProduct } from '@/api/product'
+import { useDialog } from '@/composables/useDialog'
+import { dialogMessages } from '@/constants/dialogMessages'
 
-const store = useProductStore()
 const route = useRoute()
 const router = useRouter()
+const userStore = useUserStore()
+const store = useProductStore()
+const {
+  showConfirmDialog,
+  showMessageDialog,
+  messageDialog,
+  openMessageDialog,
+  closeMessageDialog,
+  closeConfirmDialog,
+} = useDialog()
 
 const isEdit = computed(() => !!route.params.id)
 const formRef = ref(null)
 const valid = ref(false)
 const submitLoading = ref(false)
 
+// 權限判斷
+const canChangeProductStatus = computed(() => {
+  return userStore.user?.permissions.includes('product.status')
+})
+
+const canEditProductInventory = computed(() => {
+  return userStore.user?.permissions.includes('product.inventory')
+})
+
 const form = ref({
   name: '',
   productNo: '',
   price: 0,
   status: 1,
+  inventory: 0,
   description: '',
 })
 
@@ -43,18 +63,56 @@ const submit = async () => {
       await store.create(payload)
     }
 
-    router.push({ name: 'Product' })
+    // API 成功後等待 1 秒
+    await new Promise((resolve) => {
+      setTimeout(resolve, 1000)
+    })
+
+    // 顯示成功訊息
+    openMessageDialog(dialogMessages.saveSuccess)
   } catch (err) {
     console.error('儲存失敗', err)
+    // 顯示失敗訊息
+    openMessageDialog(dialogMessages.saveError)
   } finally {
     submitLoading.value = false
   }
 }
 
+// 儲存成功後，跳轉回前頁
+function handleMessageClose() {
+  closeMessageDialog()
+
+  if (messageDialog.type === 'success') {
+    router.push({
+      name: 'Product',
+    })
+  }
+}
+
+// 操作：取消
+const handleCancel = () => {
+  closeConfirmDialog()
+  router.push({ name: 'Product' })
+}
+
+const isProcessing = computed(() => submitLoading.value)
+
 onMounted(async () => {
   if (isEdit.value) {
     await store.fetchProductDetail(route.params.id)
     form.value = { ...store.current }
+  }
+})
+
+onUnmounted(() => {
+  form.value = {
+    name: '',
+    productNo: '',
+    price: 0,
+    status: 1,
+    inventory: 0,
+    description: '',
   }
 })
 </script>
@@ -65,7 +123,6 @@ onMounted(async () => {
       <v-col cols="12">
         <v-card>
           <v-card-title class="text-h6"> 商品編輯 </v-card-title>
-
           <v-card-text>
             <v-form ref="formRef" v-model="valid">
               <v-row>
@@ -96,6 +153,7 @@ onMounted(async () => {
                     variant="outlined"
                     clearable
                     :rules="rules.name"
+                    :disabled="isProcessing"
                   />
                 </v-col>
 
@@ -108,6 +166,7 @@ onMounted(async () => {
                     prefix="$"
                     variant="outlined"
                     :rules="rules.price"
+                    :disabled="isProcessing"
                   />
                 </v-col>
 
@@ -119,6 +178,19 @@ onMounted(async () => {
                     label="商品狀態"
                     variant="outlined"
                     :rules="rules.status"
+                    :disabled="!canChangeProductStatus || isProcessing"
+                  />
+                </v-col>
+
+                <!-- 庫存 -->
+                <v-col cols="12">
+                  <v-text-field
+                    v-model="form.inventory"
+                    label="庫存"
+                    type="number"
+                    variant="outlined"
+                    :rules="rules.inventory"
+                    :disabled="!canEditProductInventory || isProcessing"
                   />
                 </v-col>
 
@@ -135,37 +207,18 @@ onMounted(async () => {
               最後更新時間 {{ form.updatedAt || '-' }}
             </div>
 
-            <v-dialog max-width="400">
-              <template v-slot:activator="{ props: activatorProps }">
-                <v-btn variant="text" v-bind="activatorProps"> 捨棄 </v-btn>
+            <ConfirmDialog
+              v-model="showConfirmDialog"
+              :title="dialogMessages.discard.title"
+              :text="dialogMessages.discard.text"
+              confirm-text="確認"
+              confirm-color="red"
+              @confirm="handleCancel"
+            >
+              <template #activator="{ props }">
+                <v-btn variant="text" :disabled="isProcessing" v-bind="props"> 捨棄 </v-btn>
               </template>
-
-              <template v-slot:default="{ isActive }">
-                <v-card title="確認捨棄">
-                  <v-card-text>
-                    即將<strong class="text-error">放棄編輯</strong>，未儲存內容將遺失並返回列表頁。<br />
-                    是否繼續？
-                  </v-card-text>
-
-                  <v-card-actions>
-                    <v-spacer></v-spacer>
-
-                    <v-btn text="取消" @click="isActive.value = false"></v-btn>
-                    <v-btn
-                      text="確認"
-                      color="red"
-                      variant="flat"
-                      @click="
-                        () => {
-                          isActive.value = false
-                          router.push({ name: 'Product' })
-                        }
-                      "
-                    ></v-btn>
-                  </v-card-actions>
-                </v-card>
-              </template>
-            </v-dialog>
+            </ConfirmDialog>
 
             <v-btn color="primary" variant="flat" :loading="submitLoading" :disabled="!valid" @click="submit">
               儲存
@@ -173,6 +226,14 @@ onMounted(async () => {
           </v-card-actions>
         </v-card>
       </v-col>
+
+      <MessageDialog
+        v-model="showMessageDialog"
+        :title="messageDialog.title"
+        :text="messageDialog.text"
+        :type="messageDialog.type"
+        @close="handleMessageClose"
+      />
     </v-row>
   </v-container>
 </template>

@@ -1,40 +1,40 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
-import { getMembers, updateMember, getMemberById } from '@/api/member'
+import { getRoles, updateRole, getRoleById } from '@/api/role'
 
-export const useMemberStore = defineStore('member', () => {
+export const useRoleStore = defineStore('role', () => {
   const items = ref([])
   const current = ref(null)
   const loading = ref(false)
 
-  const roleOptions = [
-    { title: '管理員', value: 1 },
-    { title: '最高權限管理員', value: 0 },
+  const statusOptions = [
+    { title: '啟用', value: 1 },
+    { title: '停用', value: 0 },
   ]
 
-  const getRoleText = (value) => {
-    return roleOptions.find((item) => item.value === value)?.title || '-'
+  const getStatusText = (value) => {
+    return statusOptions.find((item) => item.value === value)?.title || '-'
   }
 
-  // 讀取會員列表
-  const fetchMemberList = async () => {
+  // 讀取權限列表
+  const fetchRoleList = async () => {
     try {
       loading.value = true
-      items.value = await getMembers()
+      items.value = await getRoles()
     } finally {
       loading.value = false
     }
   }
 
   // 取得單一會員
-  const fetchMemberDetail = async (id) => {
-    current.value = await getMemberById(id)
+  const fetchRoleDetail = async (id) => {
+    current.value = await getRoleById(id)
   }
 
   // 更新會員
   const update = async (id, data) => {
-    await updateMember(id, data)
+    await updateRole(id, data)
   }
 
   // 刪除
@@ -54,11 +54,11 @@ export const useMemberStore = defineStore('member', () => {
     items,
     current,
     loading,
-    fetchMemberList,
-    fetchMemberDetail,
+    fetchRoleList,
+    fetchRoleDetail,
     update,
     remove,
-    roleOptions,
-    getRoleText,
+    statusOptions,
+    getStatusText,
   }
 })

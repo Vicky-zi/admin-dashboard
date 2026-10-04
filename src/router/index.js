@@ -3,7 +3,8 @@ import { createRouter, createWebHashHistory } from 'vue-router'
 import dashboardRoutes from './page/Dashboard/Dashboard'
 import productRoutes from './page/Product/Product'
 import oderRoutes from './page/Orders/Orders'
-import memberRoutes from './page/Member/Member'
+import accountRoutes from './page/Account/Account'
+import roleRoutes from './page/Role/Role'
 
 import { useUserStore } from '@/stores/userStore.js'
 
@@ -24,7 +25,7 @@ function flattenRoute(routes) {
   return flatRoute
 }
 
-const pageRoutes = [...dashboardRoutes, ...productRoutes, ...oderRoutes, ...memberRoutes]
+const pageRoutes = [...dashboardRoutes, ...productRoutes, ...oderRoutes, ...accountRoutes, ...roleRoutes]
 
 // 給麵包屑使用的原始巢狀結構
 export const routes = [

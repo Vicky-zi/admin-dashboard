@@ -10,8 +10,8 @@ const userStore = useUserStore()
 const { showMessageDialog, messageDialog, openMessageDialog } = useDialog()
 
 const data = ref({
-  account: '',
-  password: '',
+  account: import.meta.env.DEV ? 'admin' : '',
+  password: import.meta.env.DEV ? 'admin' : '',
 })
 
 // 驗證規則

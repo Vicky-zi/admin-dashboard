@@ -1,11 +1,15 @@
 <script setup>
-import { useRouter } from 'vue-router'
-import { storeToRefs } from 'pinia'
+import { useUserStore } from '@/stores/userStore.js'
 import { useOrdersStore } from '@/stores/ordersStore'
+import { useDialog } from '@/composables/useDialog'
+import { dialogMessages } from '@/constants/dialogMessages'
 
+const route = useRoute()
 const router = useRouter()
 const ordersStore = useOrdersStore()
+const userStore = useUserStore()
 const { items, loading } = storeToRefs(ordersStore)
+const { openConfirmDialog, showConfirmDialog, closeConfirmDialog } = useDialog()
 
 const headers = [
   { title: '訂單編號', key: 'orderNo' },
@@ -16,16 +20,39 @@ const headers = [
   { title: '操作', key: 'action', sortable: false },
 ]
 
+// 權限判斷
+const canViewOrder = () => {
+  return userStore.user?.permissions.includes('order.view')
+}
+
+const canDeleteRole = () => {
+  return userStore.user?.permissions.includes('order.delete')
+}
+
 const selected = ref([])
 
 // 操作：導轉
 const goEdit = (id) => {
-  router.push({ name: 'OrdersEdit', params: { id: id } })
+  router.push({ name: `${route.name}Edit`, params: { id: id } })
+}
+
+const deleteId = ref(null)
+
+const openDeleteDialog = (id) => {
+  deleteId.value = id
+  openConfirmDialog()
 }
 
 // 操作：刪除
-const deleteItem = async (id) => {
-  await ordersStore.remove(id)
+const deleteItem = async () => {
+  try {
+    await ordersStore.remove(deleteId.value)
+
+    closeConfirmDialog()
+    deleteId.value = null
+  } catch (err) {
+    console.error('刪除失敗', err)
+  }
 }
 
 const handleBatchUpdateStatus = (status) => {
@@ -74,43 +101,26 @@ onMounted(() => {
       </template>
 
       <template v-slot:item.action="{ item }">
-        <!-- 編輯 -->
-        <v-icon class="mr-2" @click="goEdit(item.id)"> mdi-pencil </v-icon>
+        <!-- 查看 -->
+        <v-btn v-if="canViewOrder()" icon variant="text" @click="goEdit(item.id)">
+          <v-icon>mdi-eye</v-icon>
+        </v-btn>
 
         <!-- 刪除 -->
-        <v-dialog max-width="400">
-          <template v-slot:activator="{ props: activatorProps }">
-            <v-icon v-bind="activatorProps" class="mr-2"> mdi-delete </v-icon>
-          </template>
-
-          <template v-slot:default="{ isActive }">
-            <v-card title="確認刪除">
-              <v-card-text>
-                此操作將<strong class="text-error">永久刪除</strong>該資料，且<strong>無法復原</strong>。<br />
-                請確認是否繼續？
-              </v-card-text>
-
-              <v-card-actions>
-                <v-spacer></v-spacer>
-
-                <v-btn text="關閉" @click="isActive.value = false"></v-btn>
-                <v-btn
-                  text="確認"
-                  color="red"
-                  variant="flat"
-                  @click="
-                    () => {
-                      isActive.value = false
-                      deleteItem(item.id)
-                    }
-                  "
-                ></v-btn>
-              </v-card-actions>
-            </v-card>
-          </template>
-        </v-dialog>
+        <v-btn v-if="canDeleteRole()" icon variant="text" @click="openDeleteDialog(item.id)">
+          <v-icon>mdi-delete</v-icon>
+        </v-btn>
       </template>
     </v-data-table>
+
+    <ConfirmDialog
+      v-model="showConfirmDialog"
+      :title="dialogMessages.delete.title"
+      :text="dialogMessages.delete.text"
+      confirm-text="確認"
+      confirm-color="red"
+      @confirm="deleteItem()"
+    />
   </div>
 </template>
 <style lang=""></style>

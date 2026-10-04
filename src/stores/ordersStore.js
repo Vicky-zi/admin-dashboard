@@ -12,13 +12,14 @@ export const useOrdersStore = defineStore('orders', () => {
     { title: '未付款', color: '', value: 0 },
     { title: '已付款', color: 'green', value: 1 },
     { title: '付款失敗', color: 'red', value: 2 },
+    { title: '已退款', color: 'green', value: 3 },
   ]
 
   const orderStatusConfig = [
-    { title: '訂單取消', color: '', value: 0 },
+    { title: '已取消', color: '', value: 0 },
     { title: '處理中', color: 'secondary', value: 1 },
-    { title: '訂單已完成', color: 'green', value: 2 },
-    { title: '訂單退款', color: 'red', value: 3 },
+    { title: '已出貨', color: 'green', value: 2 },
+    { title: '已完成', color: 'red', value: 3 },
   ]
 
   // 取得訂單狀態
